@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Citas · Clínica Salud{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div><h1 class="h3 fw-bold mb-1">{% if rol == "paciente" %}Mis citas{% elif rol == "medico" %}Mi agenda{% else %}Gestión de citas{% endif %}</h1><p class="text-secondary mb-0">Consulta y seguimiento de citas médicas</p></div>
+  {% if rol == "administrador" or rol == "recepcion" %}<a class="btn btn-primary" href="{% url 'crear_cita' %}"><i class="bi bi-plus-lg me-1"></i>Agendar cita</a>{% endif %}
+</div>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead class="table-light"><tr><th>Fecha y hora</th>{% if rol != "paciente" %}<th>Paciente</th>{% endif %}{% if rol != "medico" %}<th>Médico</th>{% endif %}<th>Especialidad</th><th>Estado</th>{% if rol == "administrador" or rol == "recepcion" %}<th>Acciones</th>{% endif %}{% if rol == "medico" %}<th>Consulta</th>{% endif %}</tr></thead>
+  <tbody>{% for cita in citas %}
+    <tr><td>{{ cita.fecha|date:"d/m/Y" }}<br><span class="text-secondary">{{ cita.hora|time:"H:i" }}</span></td>
+    {% if rol != "paciente" %}<td>{{ cita.paciente.nombre }}</td>{% endif %}
+    {% if rol != "medico" %}<td>{{ cita.medico.usuario.get_full_name|default:cita.medico.usuario.username }}</td>{% endif %}
+    <td>{{ cita.medico.especialidad }}</td><td><span class="badge {% if cita.estado == 'programada' %}text-bg-primary{% elif cita.estado == 'atendida' %}text-bg-success{% elif cita.estado == 'cancelada' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">{{ cita.get_estado_display }}</span></td>
+    {% if rol == "administrador" or rol == "recepcion" %}<td>{% if cita.estado == "programada" %}<div class="d-flex gap-2"><a class="btn btn-sm btn-outline-primary" href="{% url 'reprogramar_cita' cita.id %}">Reprogramar</a><form method="post" action="{% url 'cancelar_cita' cita.id %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Cancelar</button></form></div>{% else %}—{% endif %}</td>{% endif %}
+    {% if rol == "medico" %}<td>{% if cita.estado == "programada" or cita.estado == "atendida" %}<a class="btn btn-sm btn-outline-primary" href="{% url 'editar_historia' cita.id %}">Abrir historia</a>{% endif %}</td>{% endif %}
+    </tr>
+  {% empty %}<tr><td colspan="7" class="text-center text-secondary py-5"><i class="bi bi-calendar-x fs-3 d-block mb-2"></i>No hay citas registradas.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}

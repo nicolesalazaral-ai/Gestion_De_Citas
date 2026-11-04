@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Horarios · Clínica Salud{% endblock %}
+{% block content %}
+<div class="row g-4"><div class="col-12 col-lg-5"><div class="card p-4"><h1 class="h4 fw-bold mb-3">Agregar horario</h1><form method="post">{% csrf_token %}{% for field in form %}<div class="mb-3"><label class="form-label">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}<button class="btn btn-primary" type="submit">Guardar horario</button></form></div></div>
+<div class="col-12 col-lg-7"><div class="card p-4"><h2 class="h4 fw-bold mb-3">Horarios registrados</h2><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Médico</th><th>Día</th><th>Horario</th><th></th></tr></thead><tbody>
+{% for item in horarios %}<tr><td>{{ item.medico.usuario.get_full_name|default:item.medico.usuario.username }}</td><td>{{ item.get_dia_semana_display }}</td><td>{{ item.hora_inicio|time:"H:i" }}–{{ item.hora_fin|time:"H:i" }}</td><td><div class="d-flex gap-2"><a class="btn btn-sm btn-outline-primary" href="{% url 'editar_horario' item.id %}">Editar</a><form method="post" action="{% url 'eliminar_horario' item.id %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form></div></td></tr>{% empty %}<tr><td colspan="4">No hay horarios.</td></tr>{% endfor %}
+</tbody></table></div></div></div></div>
+{% endblock %}
